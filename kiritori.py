@@ -54,7 +54,7 @@ def name_lists(file,floor =10000, square=4000):
         cv2.drawContours(img, rect_big, i, color, 2)
         cv2.putText(img, str(i+1), tuple(rect[0]), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 3)
     fig = plt.figure(figsize=(7,10), dpi=100)
-    plt.imshow(img)
+    # plt.imshow(img)
     print("大問の切り取り状況を保存しました。(daimon.jpg)")
     plt.savefig("./daimon.jpg")
     # x座標に着目し、画像の半分以下のものと、半分より大きいものに分けて別のリストに格納する
@@ -226,10 +226,9 @@ def sortdata_2dan_yoko(df, file, namelist):
         cv2.drawContours(img, new_rect, i, color, 2)
         cv2.putText(img, str(i+1), tuple(rect[0]), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 3)
     fig = plt.figure(figsize=(7,10), dpi=100)
-    plt.imshow(img)
     plt.savefig("./jidoukiritori.jpg")
     print("画像のように切りとります。(jidoukiritori.jpg)よければ次に進んでください。")
-
+    plt.imshow(img)
     return df3
 
 def trimdata_save(df):
@@ -370,3 +369,62 @@ def summary_table(file_name, ginou, shikou):
     df_summary = pd.concat([nyuryoku, df_shomon.iloc[:,1:]],axis=1)
     df_summary.to_csv("./seitoPDF_CSV/kousa_summary.csv", index=False, encoding="SHIFT-JIS")
     return df_summary
+
+def Saiten_mark():
+    if os.path.exists("./setting/kaitoYousi/saiten"):
+        shutil.rmtree("./setting/kaitoYousi/saiten")
+    df_zahyo = pd.read_csv("./setting/trimData.csv", index_col=0)
+    Jpg_list = os.listdir("./setting/kaitoYousi")
+    daimon_list = df_zahyo.index[1:-2]
+    df_zahyo = df_zahyo.T
+
+    for jpg in Jpg_list:
+    # 画像を読み込む
+        img = cv2.imread("./setting/kaitoYousi/" + jpg)
+    # 問題番号リストで回す
+        for daimon in daimon_list:
+    # 問題番号の座標を取得
+            x_s,y_s,x_g,y_g=df_zahyo[daimon]
+            x= round(x_s+(x_g-x_s)/2)
+            y=round(y_s+(y_g-y_s)/2)
+    # 大きさによって〇のサイズを変える
+            if x_g-x_s < y_g-y_s:
+                size = (x_g-x_s)/3
+            elif y_g-y_s < x_g-x_s:
+                size = (y_g-y_s)/3
+    # 大問フォルダの中の配点フォルダ名を取得
+            haiten_list=os.listdir("./setting/output/"+daimon)
+    # 0点フォルダは最初
+            haiten_0 = haiten_list[0]
+    # 0点フォルダのpass
+            img_path_0 = daimon +"/"+ haiten_0 + "/" + jpg
+    # バツを付ける
+            if os.path.exists("./setting/output/" + img_path_0):
+                img = cv2.drawMarker(img, (x, y), (255, 0, 0), thickness=8, markerType=cv2.MARKER_TILTED_CROSS, markerSize=int(size))
+            else:
+                pass
+    # 正解フォルダは最後
+            haiten_cor = haiten_list[-1]
+    # 正解フォルダのpass
+            img_path_cor = daimon +"/"+ haiten_cor + "/" + jpg
+    # 丸を付ける
+            if os.path.exists("./setting/output/" + img_path_cor):
+                img = cv2.circle(img, (x, y), int(size), (0, 0, 255), thickness=3, lineType=cv2.LINE_AA)
+            else:
+                pass
+    # もし配点フォルダが２つなら、○×のみなのでpassする。
+            if len(haiten_list) == 2:
+                pass
+            else:
+                haiten_bubun = haiten_list[1:-1]
+                for bubun in haiten_bubun:
+                    img_path_bubun = daimon +"/"+ bubun + "/" + jpg
+    # 三角を付ける
+                    if os.path.exists("./setting/output/" + img_path_bubun):
+                        img = cv2.drawMarker(img, (x, y), (0, 255, 0), thickness=3, markerType=cv2.MARKER_TRIANGLE_UP, markerSize=int(size))
+                    else:
+                        pass
+    # セーブする
+        if not os.path.exists("./setting/kaitoYousi/saiten"):
+            os.makedirs("./setting/kaitoYousi/saiten")
+        cv2.imwrite("./setting/kaitoYousi/saiten"+"/"+ jpg, img)
