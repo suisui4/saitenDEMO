@@ -1253,12 +1253,12 @@ def writeImg():
                 mojiSize = int(w/2)
             else:
                 mojiSize = int(h/2)
-            try:
-                font = ImageFont.truetype("arial.ttf", int(
-                    mojiSize))  # フォントを指定、64はサイズでピクセル単位
-            except:
-                font = ImageFont.truetype("AppleGothic.ttf", int(
-                    mojiSize))  # フォントを指定、64はサイズでピクセル単位
+            #try:
+             #   font = ImageFont.truetype("arial.ttf", int(
+             #       mojiSize))  # フォントを指定、64はサイズでピクセル単位
+            #except:
+            #font = ImageFont.truetype("", int(mojiSize))  # フォントを指定、64はサイズでピクセル単位
+            font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf", int(mojiSize))
     for i,f in enumerate(files):
         img = Image.open(f)
         draw = ImageDraw.Draw(img)  # ImageDrawオブジェクトを作成
