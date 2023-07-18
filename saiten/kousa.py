@@ -1304,7 +1304,7 @@ def writeImg():
             elif y_g-y_s < x_g-x_s:
                 size = (y_g-y_s)/3
             # 大問フォルダの中の配点フォルダ名を取得
-            haiten_list=os.listdir("./setting/output/"+daimon)
+            haiten_list=sorted(os.listdir("./setting/output/"+daimon))
             # 0点フォルダは最初
             haiten_0 = haiten_list[0]
             # 0点フォルダのpass
